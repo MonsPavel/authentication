@@ -28,6 +28,15 @@ class UserService {
             user: UserDto
         }
     }
+
+    async activate(activationLink) {
+        const user = await UserModal.findOne({activationLink});
+        if(!user) {
+            throw new Error('Некорректная ссылка активации');
+        }
+        user.isActivated = true;
+        await user.save();
+    }
 }
 
 module.exports = new UserService();
