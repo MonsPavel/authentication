@@ -9,7 +9,7 @@ class UserController {
 
             return res.send(userData);
         } catch (e) {
-            console.log(e);
+            next(e);
         }
     }
 
@@ -17,7 +17,7 @@ class UserController {
         try {
 
         } catch (e) {
-
+            next(e);
         }
     }
 
@@ -25,7 +25,7 @@ class UserController {
         try {
 
         } catch (e) {
-
+            next(e);
         }
     }
 
@@ -35,7 +35,7 @@ class UserController {
             await activate(link);
             return res.redirect(process.env.CLIENT_URL);
         } catch (e) {
-            console.log(e);
+            next(e);
         }
     }
 
@@ -43,7 +43,7 @@ class UserController {
         try {
 
         } catch (e) {
-
+            next(e);
         }
     }
 
@@ -51,7 +51,7 @@ class UserController {
         try {
             res.send(['123', '456']);
         } catch (e) {
-
+            next(e);
         }
     }
 }

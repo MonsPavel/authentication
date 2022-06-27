@@ -6,12 +6,13 @@ const uuid = require('uuid');
 
 const { sendActivationMail } = require('./mail-service');
 const { generateTokens, saveToken } = require('./token-service');
+const ApiError = require('../exceptions/api-error');
 
 class UserService {
     async registration(email, password) {
         const candidate = await UserModal.find({email});
         if(candidate.length) {
-            throw new Error(`Пользователь с email ${email} уже существует`);
+            throw ApiError.BadRequest(`Пользователь с email ${email} уже существует`);
         }
         const hashPassword = await bcrypt.hash(password, 3);
         const activationLink = uuid.v4();
@@ -32,7 +33,7 @@ class UserService {
     async activate(activationLink) {
         const user = await UserModal.findOne({activationLink});
         if(!user) {
-            throw new Error('Некорректная ссылка активации');
+            throw ApiError.BadRequest('Некорректная ссылка активации');
         }
         user.isActivated = true;
         await user.save();
