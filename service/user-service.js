@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const uuid = require('uuid');
 
 const { sendActivationMail } = require('./mail-service');
-const { generateTokens, saveToken } = require('./token-service');
+const { generateTokens, saveToken, removeToken } = require('./token-service');
 const ApiError = require('../exceptions/api-error');
 
 class UserService {
@@ -56,6 +56,10 @@ class UserService {
             ...tokens,
             user: UserDto
         }
+    }
+
+    async logout(refreshToken) {
+        const token = await removeToken(refreshToken);
     }
 }
 
