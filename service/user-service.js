@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const uuid = require('uuid');
 
 const { sendActivationMail } = require('./mail-service');
-const { generateTokens, saveToken, removeToken } = require('./token-service');
+const { generateTokens, saveToken, removeToken, validateRefreshToken, findToken } = require('./token-service');
 const ApiError = require('../exceptions/api-error');
 
 class UserService {
@@ -42,14 +42,14 @@ class UserService {
     async login(email, password) {
         const user = await UserModal.findOne({ email });
         if(!user) {
-            throw ApiError.BadRequest('Пользователь с таким email не найден')
+            throw ApiError.BadRequest('Пользователь с таким email не найден');
         }
-        const isPassEquals = await bcrypt.compare(password, user.password)
+        const isPassEquals = await bcrypt.compare(password, user.password);
         if(!isPassEquals) {
-            throw ApiError.BadRequest('Неверный пароль')
+            throw ApiError.BadRequest('Неверный пароль');
         }
         const userDto = new UserDto(user)
-        const tokens = generateTokens({ ...userDto })
+        const tokens = generateTokens({ ...userDto });
         await saveToken(userDto.id, tokens.refreshToken);
 
         return {
@@ -60,6 +60,27 @@ class UserService {
 
     async logout(refreshToken) {
         const token = await removeToken(refreshToken);
+    }
+
+    async refresh(refreshToken) {
+        if(!refreshToken) {
+            throw ApiError.UnauthorizedError();
+        }
+        const userData = validateRefreshToken(refreshToken);
+        const tokenFromDb = await findToken(refreshToken);
+        if(!userData || !tokenFromDb) {
+            throw ApiError.UnauthorizedError();
+        }
+
+        const user = await UserModal.findById(userData.id);
+        const userDto = new UserDto(user);
+        const tokens = generateTokens({ ...userDto });
+        await saveToken(userDto.id, tokens.refreshToken);
+
+        return {
+            ...tokens,
+            user: UserDto
+        }
     }
 }
 
