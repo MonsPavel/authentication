@@ -1,4 +1,4 @@
-const { registration, activate, login, logout } = require('../service/user-service');
+const { registration, activate, login, logout, refresh } = require('../service/user-service');
 const { validationResult } = require('express-validator');
 const ApiError = require('../exceptions/api-error');
 
@@ -54,7 +54,11 @@ class UserController {
 
     async refresh(req, res, next) {
         try {
+            const { refreshToken } = req.cookies;
+            const userData = await refresh(refreshToken);
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30*24*60*60*1000, httpOnly: true});
 
+            return res.send(userData);
         } catch (e) {
             next(e);
         }
