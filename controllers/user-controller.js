@@ -1,4 +1,4 @@
-const { registration, activate, login, logout, refresh } = require('../service/user-service');
+const { registration, activate, login, logout, refresh, getAllUsers } = require('../service/user-service');
 const { validationResult } = require('express-validator');
 const ApiError = require('../exceptions/api-error');
 
@@ -66,7 +66,8 @@ class UserController {
 
     async getUsers(req, res, next) {
         try {
-            res.send(['123', '456']);
+            const users = await getAllUsers();
+            return res.send(users);
         } catch (e) {
             next(e);
         }

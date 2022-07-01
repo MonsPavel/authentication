@@ -82,6 +82,11 @@ class UserService {
             user: UserDto
         }
     }
+
+    async getAllUsers() {
+        const users = await UserModal.find();
+        return users;
+    }
 }
 
 module.exports = new UserService();
